@@ -1,0 +1,55 @@
+name: dbt CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "models/**"
+      - "macros/**"
+      - "seeds/**"
+      - "snapshots/**"
+      - "dbt_project.yml"
+      - "requirements.txt"
+      - ".github/workflows/dbt_ci.yml"
+
+jobs:
+  dbt-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOF
+          brandon_databricks_issue:
+            target: ci
+            outputs:
+              ci:
+                type: databricks
+                catalog: ${{ secrets.DATABRICKS_CATALOG }}
+                schema: ${{ secrets.DATABRICKS_CI_SCHEMA }}
+                host: ${{ secrets.DATABRICKS_HOST }}
+                http_path: ${{ secrets.DATABRICKS_HTTP_PATH }}
+                token: ${{ secrets.DATABRICKS_TOKEN }}
+                threads: 4
+          EOF
+
+      - name: dbt debug
+        run: dbt debug
+
+      - name: dbt seed
+        run: dbt seed
+
+      - name: dbt build
+        run: dbt build

@@ -26,6 +26,10 @@
 - `terraform/` — IaC for the Databricks job that runs `dbt seed` +
   `dbt build` on a schedule. See `terraform/README.md` for the full
   setup and troubleshooting guide.
+- `.github/workflows/` — CI that runs `dbt seed` + `dbt build` against
+  Databricks on every pull request. See
+  `.github/workflows/README.md` for personal-account and
+  team/service-principal setup.
 
 ## Setup
 
