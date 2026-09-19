@@ -5,3 +5,4 @@ profiles.yml
 .env
 __pycache__/
 *.pyc
+*.png

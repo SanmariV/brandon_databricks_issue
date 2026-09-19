@@ -1,0 +1,32 @@
+version: 2
+
+sources:
+  - name: landing_crm
+    schema: landing_crm
+    description: >
+      Raw CRM landing tables. Each batch overwrites these with the
+      source system's CURRENT state only — no history. Full history is
+      built downstream by the bronze_crm snapshots, not here.
+    tables:
+      - name: postcodebase
+        columns:
+          - name: address_id
+            description: Primary key. Stable across renames of log_name.
+            tests:
+              - unique
+              - not_null
+
+      - name: accountbase
+        columns:
+          - name: account_id
+            description: Primary key. Stable across renames of name.
+            tests:
+              - unique
+              - not_null
+          - name: address_id
+            description: Foreign key to postcodebase.address_id.
+            tests:
+              - not_null
+              - relationships:
+                  to: source('landing_crm', 'postcodebase')
+                  field: address_id

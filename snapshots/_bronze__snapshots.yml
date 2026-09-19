@@ -1,0 +1,28 @@
+version: 2
+
+snapshots:
+  - name: log_postcodebase_snapshot
+    tests:
+      - no_scd_gaps:
+          valid_from: dbt_valid_from
+          valid_to: dbt_valid_to
+          partition_by: address_id
+      - one_current_row:
+          valid_to: dbt_valid_to
+          partition_by: address_id
+      - valid_to_after_valid_from:
+          valid_from: dbt_valid_from
+          valid_to: dbt_valid_to
+
+  - name: accountbase_snapshot
+    tests:
+      - no_scd_gaps:
+          valid_from: dbt_valid_from
+          valid_to: dbt_valid_to
+          partition_by: account_id
+      - one_current_row:
+          valid_to: dbt_valid_to
+          partition_by: account_id
+      - valid_to_after_valid_from:
+          valid_from: dbt_valid_from
+          valid_to: dbt_valid_to

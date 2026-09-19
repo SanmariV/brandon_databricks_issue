@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: crm_pit_spine
+    description: >
+      Point-in-time spine joining account history to its linked
+      address's history via accountbase_snapshot.address_id =
+      log_postcodebase_snapshot.address_id. One row per segment where
+      the account name and linked postcode name both stayed fixed.
+    columns:
+      - name: account_id
+        tests:
+          - not_null
+      - name: seg_from
+        tests:
+          - not_null
+    tests:
+      - no_scd_gaps:
+          valid_from: seg_from
+          valid_to: seg_to
+          partition_by: account_id
+      - one_current_row:
+          valid_to: seg_to
+          partition_by: account_id
+      - valid_to_after_valid_from:
+          valid_from: seg_from
+          valid_to: seg_to
