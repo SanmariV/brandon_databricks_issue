@@ -16,12 +16,15 @@ models:
           - not_null
     tests:
       - no_scd_gaps:
-          valid_from: seg_from
-          valid_to: seg_to
-          partition_by: account_id
+          arguments:
+            valid_from: seg_from
+            valid_to: seg_to
+            partition_by: account_id
       - one_current_row:
-          valid_to: seg_to
-          partition_by: account_id
+          arguments:
+            valid_to: seg_to
+            partition_by: account_id
       - valid_to_after_valid_from:
-          valid_from: seg_from
-          valid_to: seg_to
+          arguments:
+            valid_from: seg_from
+            valid_to: seg_to
