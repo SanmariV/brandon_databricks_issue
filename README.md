@@ -1,20 +1,18 @@
 # brandon_databricks_issue
 
-This is a prototype dbt project trying to solve Brandon's bronze-layer
-issue: a hand-rolled watermark mechanism was silently dropping historical
-rows, breaking the client's request for full history in the bronze CRM
-tables. See `bronze_scd_test_macros.md` for the full write-up of the bug
-and the approach taken here (dbt snapshots + custom tests instead of a
-hand-rolled watermark filter).
-
 ## Project layout
 
-- `models/staging/_landing__sources.yml` — the raw, current-state-only
-  `landing_crm` source tables (`postcodebase`, `accountbase`), with PK
-  (`unique`/`not_null`) and FK (`relationships`) tests.
+- `seeds/postcodebase.csv` / `accountbase.csv` — the raw, current-state-only
+  fixture data, loaded via `dbt seed` into `landing_crm.postcodebase` /
+  `landing_crm.accountbase`. `seeds/_landing__seeds.yml` has the PK
+  (`unique`/`not_null`) and FK (`relationships`) tests on them.
 - `snapshots/` — `log_postcodebase_snapshot` and `accountbase_snapshot`,
   the dbt snapshots that build full SCD2 history in `bronze_crm` from
-  the current-state landing tables.
+  the seeds, referenced via `ref()` (not `source()` — the seeds are
+  dbt-managed, not an external source, so `ref()` is what gives dbt a
+  real dependency edge ensuring the seed loads before anything reads
+  it; using `source()` here caused a real DAG race condition where
+  tests ran concurrently with the seed still loading).
 - `models/marts/crm_pit_spine.sql` — joins the two histories via
   `accountbase_snapshot.address_id = log_postcodebase_snapshot.address_id`
   into a point-in-time spine, one row per segment where an account's
@@ -22,11 +20,12 @@ hand-rolled watermark filter).
 - `macros/` — three custom generic tests (`no_scd_gaps`,
   `one_current_row`, `valid_to_after_valid_from`) applied to both the
   snapshots and the spine model.
-- `seeds/` — fake fixture data (5 accounts, 3 addresses) loaded into
-  `landing_crm` via `dbt seed`.
 - `notebooks/` — standalone Databricks SQL notebooks that test the same
   test logic directly against fake data, independent of dbt, useful for
   sanity-checking the SQL itself.
+- `terraform/` — IaC for the Databricks job that runs `dbt seed` +
+  `dbt build` on a schedule. See `terraform/README.md` for the full
+  setup and troubleshooting guide.
 
 ## Setup
 
