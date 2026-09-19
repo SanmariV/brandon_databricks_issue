@@ -12,6 +12,6 @@
 select
     address_id,
     log_name
-from {{ source('landing_crm', 'postcodebase') }}
+from {{ ref('postcodebase') }}
 
 {% endsnapshot %}

@@ -1,0 +1,30 @@
+version: 2
+
+seeds:
+  - name: postcodebase
+    description: >
+      Fake current-state landing data (address_id PK) — dbt seed
+      standing in for what a real ingestion pipeline would land here.
+    columns:
+      - name: address_id
+        tests:
+          - unique
+          - not_null
+
+  - name: accountbase
+    description: >
+      Fake current-state landing data (account_id PK, address_id FK) —
+      dbt seed standing in for what a real ingestion pipeline would
+      land here.
+    columns:
+      - name: account_id
+        tests:
+          - unique
+          - not_null
+      - name: address_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('postcodebase')
+                field: address_id

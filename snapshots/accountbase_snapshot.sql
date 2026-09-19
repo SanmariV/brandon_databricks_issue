@@ -13,6 +13,6 @@ select
     account_id,
     name,
     address_id
-from {{ source('landing_crm', 'accountbase') }}
+from {{ ref('accountbase') }}
 
 {% endsnapshot %}
