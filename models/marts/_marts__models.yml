@@ -7,7 +7,13 @@ models:
       address's history via accountbase_snapshot.address_id =
       log_postcodebase_snapshot.address_id. One row per segment where
       the account name and linked postcode name both stayed fixed.
+      Incremental (delete+insert on account_id): only accounts touched by
+      new snapshot rows are recomputed each run.
     columns:
+      - name: source_updated_at
+        description: >
+          Run time (dbt_updated_at) of the newest snapshot row feeding this
+          segment. max() of this column is the incremental watermark.
       - name: account_id
         tests:
           - not_null
